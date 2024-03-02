@@ -1,0 +1,21 @@
+parameters:
+  - name: AppName
+    default: ''
+  - name: Subscription
+    default: ''
+  - name: DeployEnv
+    default: ''
+  - name: ArtifactName
+    default: ''
+steps:
+- task: AzureRmWebAppDeployment@4
+  displayName: 'Deploy ${{ parameters.ArtifactName }}-${{ parameters.DeployEnv }}'
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: ${{ parameters.Subscription }}
+    appType: 'webApp'
+    WebAppName: ${{ parameters.AppName }}
+    packageForLinux: '$(Pipeline.Workspace)/${{ parameters.ArtifactName }}.zip/${{ parameters.ArtifactName }}.zip'
+    enableCustomDeployment: true
+    DeploymentType: 'runFromZip'
+    JSONFiles: '**/appsettings.json'

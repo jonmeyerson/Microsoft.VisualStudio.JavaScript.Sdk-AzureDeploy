@@ -1,0 +1,39 @@
+name: Test._$(SourceBranchName)_$(Date:yyyyMMdd)_$(Rev:.r)
+trigger: none
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  functionsArtifactName: 'Test.Functions'
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    steps:
+    - task: UseDotNet@2
+      inputs:
+        packageType: 'sdk'
+        version: '6.0.419'
+
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'restore'
+        workingDirectory: 'AzureDeploymentTest.Server'
+
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'build'
+        arguments: '--configuration Release --no-restore'
+        workingDirectory: 'AzureDeploymentTest.Server'
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'publish'
+        workingDirectory: 'AzureDeploymentTest.Server'
+        arguments: '--configuration Release --output $(functionsArtifactName) --no-build'
+    - task: PublishBuildArtifacts@1
+      displayName: 'Archived Artifact $(functionsArtifactName)'
+      inputs:
+        PathtoPublish: '$(System.DefaultWorkingDirectory)/$(functionsArtifactName).zip'
+        ArtifactName: '$(functionsArtifactName).zip'
+        publishLocation: 'Container'
